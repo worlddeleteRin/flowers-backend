@@ -68,8 +68,7 @@ async def delete_cart(
     }
 
 @router.post("/{session_id}")
-async def create_cart(
-        request: Request,
+async def create_cart( request: Request,
         session_id: uuid.UUID,
         line_items: List[LineItem] = Body(..., embed=True),
         # token: str = None,
@@ -79,9 +78,8 @@ async def create_cart(
         Create a cart for currently logged in user
         ---------------
         Exceptions:
-        - line_items are empty or incorrect
-    """
-    """
+        - [line_items] are empty or incorrect
+        ---------------
     try to get current user, if user looged in and pass credentials
     in headers
     """
