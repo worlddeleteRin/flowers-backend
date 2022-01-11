@@ -41,6 +41,7 @@ class BaseProductCategory(BaseModel):
 
 
 class BaseCategoryCreate(BaseModel):
+    """ Base category create model """
     name: str
     slug: str
     description: str = ""

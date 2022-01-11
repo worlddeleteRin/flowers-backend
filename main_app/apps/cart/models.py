@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+# from fastapi import FastAPI
 import uuid
 from pymongo import ReturnDocument
 from enum import Enum
@@ -99,6 +99,9 @@ class BaseCart(BaseModel):
     coupon_gifts: List[BaseProduct] = []
     # bonuses to apply to the user
     bonuses_to_apply: Optional[int] = None
+
+    class Config:
+        allow_population_by_field_name = True
 
     def delete_coupons(self):
         for line_item in self.line_items:

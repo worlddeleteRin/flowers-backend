@@ -125,6 +125,7 @@ class BaseOrderUpdate(BaseModel):
 
 class BaseOrder(BaseModel):
     """ Base Order Model """
+
     id: UUID4 = Field(default_factory=uuid.uuid4, alias="_id")
     # id of cart, that was converted to order
     cart_id: Optional[UUID4] = None

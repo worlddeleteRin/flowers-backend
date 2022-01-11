@@ -23,6 +23,9 @@ from database.main_db import db_provider
 
 # include all necessary routes
 app = FastAPI(
+    title="Flowers API backend",
+    version="0.0.1",
+    description="backend api endpoints for flowers app",
     dependencies=[Depends(get_api_app_client)]
 )
 # mount static files folder

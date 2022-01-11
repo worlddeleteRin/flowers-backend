@@ -1,6 +1,7 @@
 from fastapi import Depends, Request, FastAPI
 from pydantic import UUID4
 from jose import JWTError, jwt
+from starlette.exceptions import HTTPException
 
 
 from .models import BaseUser, BaseUserDB, Token, TokenData, BaseUserCreate, BaseUserVerify, BaseUserRestore, BaseUserRestoreVerify, UserDeliveryAddress, UserDeliveryAddress
@@ -82,6 +83,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         token_data = TokenData(username = username)
     except JWTError:
         raise InvalidAuthenticationCredentials
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail="Authentication error"
+        )
     if not token_data.username:
         raise InvalidAuthenticationCredentials
     user = get_user(username = token_data.username)

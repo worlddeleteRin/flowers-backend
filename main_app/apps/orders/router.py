@@ -50,7 +50,6 @@ def get_orders(
     per_page: int = 8,
     page: int = 1,
 ):
-    print('page is', page)
     orders = get_orders_db(
         per_page = per_page,
         page = page,
@@ -202,7 +201,7 @@ async def create_order(
 #       if cart:
 #           cart.delete_db()
     # add background task to send order notification
-    order_created_event(background_tasks, order)
+    # order_created_event(background_tasks, order)
     # background_tasks.add_task(send_order_admin_notification, order)
 
     order.dict()

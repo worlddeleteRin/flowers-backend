@@ -1,23 +1,23 @@
-from fastapi import APIRouter, Depends, Request, Response, Body, HTTPException
-from typing import Optional, List
+from fastapi import APIRouter, Depends, Request, Body, HTTPException
+from typing import List
 
-from datetime import datetime, timedelta
+# from datetime import datetime
 
-from pymongo import ReturnDocument
+# from pymongo import ReturnDocument
 
 # import config (env variables)
-from config import settings
+# from config import settings
 
-from .models import BaseCart, LineItem, LineItemUpdate, SessionId
-from .cart_exceptions import CartAlreadyExist, CartNotExist, NotValidUUID
+from .models import BaseCart, LineItem, LineItemUpdate
+from .cart_exceptions import CartAlreadyExist, CartNotExist
 
 from apps.users.user import get_current_user, get_current_user_silent
-from apps.users.models import BaseUser, BaseUserDB
+from apps.users.models import BaseUser
 # from coupons app
 from apps.coupons.coupon import get_coupon_by_id
-from apps.coupons.models import BaseCoupon, BaseCouponDB
+from apps.coupons.models import BaseCoupon
 
-from bson import json_util
+# from bson import json_util
 
 from .cart import  get_current_cart_active_by_id, get_cart_by_session_id
 
@@ -46,13 +46,14 @@ def get_or_create_session(request: Request):
 @router.get("/{session_id}")
 async def get_cart(
     session_id: uuid.UUID
-    ):
+    ) -> dict | None:
 #   print('request session is', request.session)
 #   get_or_create_session(request)
 #   print('session UUID is', uuid.UUID(request.session.get("session_id", None)))
-    cart = get_cart_by_session_id(session_id)
+    cart: BaseCart | None = get_cart_by_session_id(session_id)
     if cart:
         return cart.dict()
+    return None
 
 @router.delete("/{cart_id}")
 async def delete_cart(
@@ -68,7 +69,7 @@ async def delete_cart(
     }
 
 @router.post("/{session_id}")
-async def create_cart( request: Request,
+async def create_cart(request: Request,
         session_id: uuid.UUID,
         line_items: List[LineItem] = Body(..., embed=True),
         # token: str = None,
