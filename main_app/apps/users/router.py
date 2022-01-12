@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request, Body
+from fastapi import APIRouter, Depends, Request, Form
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import UUID4
 
@@ -7,31 +7,28 @@ from typing import Optional, List
 from datetime import datetime, timedelta
 
 from pymongo import ReturnDocument
+from apps.users.authentication_provider import AuthenticationProvider
 
 # import config (env variables)
 from config import settings
 
-from .models import BaseUser, BaseUserDB, BaseUserCreate, BaseUserVerify, BaseUserUpdate, BaseUserUpdatePassword, Token, TokenData, BaseUserExistVerified, BaseUserRestore, BaseUserRestoreVerify, UserDeliveryAddress, UserDeleteDeliveryAddress
+from .models import AuthenticationTypeEnum, BaseUser, BaseUserDB, BaseUserCreate, BaseUserLoginInfo, BaseUserVerify, BaseUserUpdate, BaseUserUpdatePassword, Token, TokenData, BaseUserExistVerified, BaseUserRestore, BaseUserRestoreVerify, UserDeliveryAddress, UserDeleteDeliveryAddress
 # models 
-from .user import get_current_active_user, get_current_user, get_user, authenticate_user, get_user_register, get_user_verify, get_user_restore, get_user_restore_verify, get_current_admin_user, search_users_by_username, get_user_delivery_addresses
+from .user import authenticate_user_call_otp, get_current_active_user, get_current_user, get_user, authenticate_user_password, get_user_by_username, get_user_register, get_user_verify, get_user_restore, get_user_restore_verify, get_current_admin_user, search_users_by_username, get_user_delivery_addresses
 
 from .password import get_password_hash
 
 from .jwt import create_access_token
 
 # user exceptions
-from .user_exceptions import IncorrectUsernameOrPassword, NotSendVerificationCode
+from .user_exceptions import IncorrectUsernameOrPassword, NotSendVerificationCode, UserNotExist, IncorrectUserCredentials
 
 # user password hash and decode methods
 from .password import get_password_hash
 
-# verification send sms methods
-# from .verification import send_verification_sms_code
-from apps.sms.smsc import smsc_send_call_code
-
 from apps.orders.orders import get_orders_by_user_id
 
-from .user import get_current_admin_user, get_user_by_id
+from .user import get_current_admin_user, get_user_by_id, create_user
 
 from database.main_db import db_provider
 
@@ -43,15 +40,72 @@ router = APIRouter(
     # responses ? 
 )
 
+authenticationProvider = AuthenticationProvider()
+
+@router.get("/login")
+async def login_user(
+    login_info: BaseUserLoginInfo,
+):
+    success = True
+    otp_code = ""
+    user: BaseUserDB | None = get_user_by_username(
+        username = login_info.username
+    )
+    if not user:
+        if login_info.authentication_type == AuthenticationTypeEnum.password:
+            raise UserNotExist 
+        user = create_user(
+            username = login_info.username
+        )
+    if login_info.authentication_type == AuthenticationTypeEnum.password:
+        pass
+    elif login_info.authentication_type == AuthenticationTypeEnum.call_otp:
+        success,otp_code = authenticationProvider.send_call_otp(
+            phone=user.username,
+            is_testing=login_info.is_testing,
+        )
+    elif login_info.authentication_type == AuthenticationTypeEnum.sms_otp:
+        pass
+    if (success 
+        and otp_code 
+        #and (not login_info.is_testing)
+        ):
+        user.otp = otp_code
+        user.update_db()
+
+    return {
+        "success": success,
+        "is_testing": login_info.is_testing,
+        "otp_code": otp_code,
+        "login_info": login_info.dict(),
+        # "user": user.dict(),
+    }
 
 @router.post("/token")
 async def login_for_access_token(
-    form_data: OAuth2PasswordRequestForm = Depends()
+    username: str = Form(...),
+    password: str = Form(default=None),
+    otp: str = Form(default=None),
+    auth_type: AuthenticationTypeEnum  = Form(...)
+    # form_data: OAuth2PasswordRequestForm = Depends()
 ):
     print('get token request')
-    user = authenticate_user(form_data.username, form_data.password)
-    if not user:
-        raise IncorrectUsernameOrPassword
+    is_authenticated: bool = False
+    user: BaseUserDB = get_user(username=username)
+    if auth_type == AuthenticationTypeEnum.password:
+        is_authenticated = authenticate_user_password(
+            user = user,
+            password = password,
+        )
+    elif auth_type == AuthenticationTypeEnum.call_otp:
+        is_authenticated = authenticate_user_call_otp(
+            user = user,
+            otp = otp,
+        )
+    # check if user successfully authenticated
+    if not is_authenticated:
+        raise IncorrectUserCredentials 
+    # generate access_token
     access_token_expires = timedelta(minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data = {"sub": user.username}, expires_delta=access_token_expires,
@@ -67,6 +121,10 @@ async def login_for_access_token(
 async def check_exist_verified_user(
     user_info: BaseUserExistVerified,
     ):
+    """
+        Check if user with passed `username` is verified,
+        return verified bool status in `exist_verified` key
+    """
     exist_verified = False
     print('user info is', user_info)
     user = db_provider.users_db.find_one({"username": user_info.username})
@@ -83,20 +141,20 @@ async def read_users_me(
     ):
     return current_user.dict(exclude={"hashed_password"})
 
+
+
 @router.post("/register")
 async def register_user(
     user_info: BaseUserCreate,
     user_to_register: BaseUserDB = Depends(get_user_register),
     ):
     """
-        Get username, password
+        Register user
     """
     print('run register method')
     # need to send verification sms code, and, save it to user database field
-    is_success, code = smsc_send_call_code(
-        smsc_login = settings.smsc_login,
-        smsc_password = settings.smsc_password,
-        phone = user_to_register.username,
+    is_success, code = authenticationProvider.send_call_otp(
+        phone = user_to_register.username
     )
     if not is_success:
         # raise exception, that otp code is not send
@@ -127,10 +185,8 @@ async def restore_user(
     """
 
     # need to send verification sms code, and, save it to user database field
-    is_success, code =  smsc_send_call_code(
-        smsc_login = settings.smsc_login,
-        smsc_password = settings.smsc_password,
-        phone = user_to_restore.username,
+    is_success, code = authenticationProvider.send_call_otp(
+        phone = user_to_restore.username
     )
     if not is_success:
         print('не удалось отправить код подтверждения')

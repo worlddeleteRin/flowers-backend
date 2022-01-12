@@ -5,6 +5,11 @@ class IncorrectUsernameOrPassword(HTTPException):
 		self.status_code = 400
 		self.detail = "incorrect username os password"
 
+class IncorrectUserCredentials(HTTPException):
+	def __init__(self):
+		self.status_code = 400
+		self.detail = "incorrect user credentials"
+
 class NotSendVerificationCode(HTTPException):
 	def __init__(self):
 		self.status_code = 400

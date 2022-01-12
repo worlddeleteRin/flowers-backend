@@ -18,12 +18,12 @@ class SMSCProvider(BaseModel):
             "call": "1",
             "fmt": 3,
         }
-        # print('params are', params)
-        response: requests.Response = requests.get(base_url, params = params)
-        # print('response is', response.json())
+        response: requests.Response = requests.get(base_url, params = params).json()
+        print('response request is')
+        print('response is', response.request)
         if 'error' in response.json():
             return False, None
-        code = response.json()['code']
+        code = response['code']
         # get only 4 last digets of 6 digets code
         code_final = code[2:]
         return True, code_final

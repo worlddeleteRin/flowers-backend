@@ -20,21 +20,64 @@ from database.main_db import db_provider
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/token", auto_error = False)
 
 
-
-# authenticate user
-def authenticate_user(username: str, password: str):
-    user = get_user(username)
-    if not user:
-        return False
-    if not verify_password(password, user.hashed_password):
-        return False
+def create_user(
+    username: str,
+    password: str = "",
+) -> BaseUserDB:
+    hashed_password = ""
+    password = password.strip()
+    if password.__len__() > 6:
+        hashed_password = get_password_hash(user_info.password)
+    new_user = BaseUserDB(
+        username = username,
+        hashed_password = hashed_password,
+    )
+    db_provider.users_db.insert_one(new_user.dict(by_alias=True))
+    user: BaseUserDB = BaseUser(**new_user.dict())
     return user
 
+def get_user_by_username(
+    username: str
+) -> BaseUserDB | None:
+    userRaw = db_provider.users_db.find_one(
+        {"username": username}
+    )
+    if not userRaw:
+        return None
+    user = BaseUserDB(**userRaw)
+    return user
+
+def authenticate_user_password(
+user: BaseUserDB, 
+password: str) -> bool:
+    """
+        Authenticate user by username and password
+    """
+    if not verify_password(password, user.hashed_password):
+        return False
+    return True
+
+def authenticate_user_call_otp(
+user: BaseUserDB, 
+otp: str) -> bool:
+    """
+        Authenticate user by username and call otp code 
+    """
+    if (not user.otp or 
+        not user.otp.__len__() == 4 or
+        not user.otp == otp
+        ):
+        return False
+    user.otp = ""
+    user.update_db()
+    return True
+
 def get_user(username: str) -> BaseUserDB:
+    print('run get user')
     user_dict = db_provider.users_db.find_one({"username": username})
     #print('user dict is', user_dict)
     if not user_dict:
-        raise
+        raise UserNotExist
     return BaseUserDB(**user_dict)
 
 
@@ -74,7 +117,9 @@ async def get_current_user_silent(token: str = Depends(oauth2_scheme)):
         # raise InvalidAuthenticationCredentials
     return user
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_current_user(
+    token: str = Depends(oauth2_scheme)
+):
     try:
         payload = decode_token(token, settings.JWT_SECRET_KEY, [settings.JWT_ALGORITHM])
         username = payload.get("sub")

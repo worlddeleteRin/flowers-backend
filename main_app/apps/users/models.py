@@ -1,3 +1,4 @@
+from enum import Enum
 import uuid
 
 from typing import Optional, List
@@ -17,6 +18,11 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: Optional[str] = None
 
+class AuthenticationTypeEnum(str, Enum):
+    sms_otp = "sms_otp"
+    call_otp = "call_otp"
+    password = "password"
+    
 
 class UserDeleteDeliveryAddress(BaseModel):
     id: UUID4
@@ -57,14 +63,14 @@ class BaseUser(BaseModel):
     """ Base User Model """
     id: UUID4 = Field(default_factory=uuid.uuid4, alias="_id")
     date_created: Optional[datetime] = Field(default_factory=datetime.utcnow)
-    email: Optional[str] = ""
+    email: str = ""
     username: str
-    is_active: Optional[bool] = False
-    is_superuser: Optional[bool] = False
-    is_verified: Optional[bool] = False
-    name: Optional[str] = ""
+    is_active: bool = False
+    is_superuser: bool = False
+    is_verified: bool = False
+    name: str = ""
     bonuses: int = 0
-    bonuses_rank: Optional[int] = 1
+    bonuses_rank: int = 1
 
     class Config:
         allow_population_by_field_name = True
@@ -79,7 +85,7 @@ class BaseUser(BaseModel):
 
 class BaseUserCreate(BaseModel):
     username: str
-    password: str
+    password: str = ""
 
 class BaseUserRestore(BaseModel):
     username: str
@@ -90,7 +96,7 @@ class BaseUserRestoreVerify(BaseModel):
 
 class BaseUserVerify(BaseModel):
     username: str
-    password: str
+    password: str = ""
     otp: str
 
 class BaseUserExistVerified(BaseModel):
@@ -103,9 +109,14 @@ class BaseUserUpdate(BaseModel):
 class BaseUserUpdatePassword(BaseModel):
     password: str
 
+class BaseUserLoginInfo(BaseModel):
+    username: str
+    authentication_type: AuthenticationTypeEnum
+    is_testing: bool = False
+
 
 class BaseUserDB(BaseUser):
-    hashed_password: str
+    hashed_password: str = ""
     otp: Optional[str] = None
 
 
