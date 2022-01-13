@@ -4,6 +4,9 @@ from functools import lru_cache
 import os
 import sys
 
+# some changes here
+# some changes there
+
 class Settings(BaseSettings):
     app_name: str = "Some app name"
     JWT_SECRET_KEY: str = ''
