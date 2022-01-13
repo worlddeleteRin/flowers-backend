@@ -12,7 +12,7 @@ from .jwt import decode_token, create_access_token
 
 from .password import verify_password, get_password_hash
 
-from .user_exceptions import InvalidAuthenticationCredentials, IncorrectVerificationCode, InactiveUser, UserAlreadyExist, UserNotExist, UserDeliveryAddressNotExist, UserNotAdmin
+from .user_exceptions import InvalidAuthenticationCredentials, IncorrectVerificationCode, InactiveUser, UserAlreadyExist, UserNotExist, UserDeliveryAddressNotExist, UserNotAdmin, UsernameNotValid
 
 from database.main_db import db_provider
 
@@ -27,14 +27,23 @@ def create_user(
     hashed_password = ""
     password = password.strip()
     if password.__len__() > 6:
-        hashed_password = get_password_hash(user_info.password)
+        hashed_password = get_password_hash(password)
+    username = format_validate_username(username)
     new_user = BaseUserDB(
         username = username,
         hashed_password = hashed_password,
     )
     db_provider.users_db.insert_one(new_user.dict(by_alias=True))
-    user: BaseUserDB = BaseUser(**new_user.dict())
+    user: BaseUserDB = BaseUserDB(**new_user.dict())
     return user
+
+def format_validate_username(
+    username: str 
+) -> str:
+    username = username.replace(" ", "")
+    if len(username) != 11: 
+        raise UsernameNotValid
+    return username
 
 def get_user_by_username(
     username: str

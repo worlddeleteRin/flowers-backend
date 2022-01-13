@@ -14,7 +14,7 @@ from config import settings
 
 from .models import AuthenticationTypeEnum, BaseUser, BaseUserDB, BaseUserCreate, BaseUserLoginInfo, BaseUserVerify, BaseUserUpdate, BaseUserUpdatePassword, Token, TokenData, BaseUserExistVerified, BaseUserRestore, BaseUserRestoreVerify, UserDeliveryAddress, UserDeleteDeliveryAddress
 # models 
-from .user import authenticate_user_call_otp, get_current_active_user, get_current_user, get_user, authenticate_user_password, get_user_by_username, get_user_register, get_user_verify, get_user_restore, get_user_restore_verify, get_current_admin_user, search_users_by_username, get_user_delivery_addresses
+from .user import authenticate_user_call_otp, format_validate_username, get_current_active_user, get_current_user, get_user, authenticate_user_password, get_user_by_username, get_user_register, get_user_verify, get_user_restore, get_user_restore_verify, get_current_admin_user, search_users_by_username, get_user_delivery_addresses
 
 from .password import get_password_hash
 
@@ -42,15 +42,17 @@ router = APIRouter(
 
 authenticationProvider = AuthenticationProvider()
 
-@router.get("/login")
+@router.post("/login")
 async def login_user(
     login_info: BaseUserLoginInfo,
 ):
     success = True
-    otp_code = ""
+    otp_code = None
+    username = format_validate_username(login_info.username)
     user: BaseUserDB | None = get_user_by_username(
-        username = login_info.username
+        username = username
     )
+    print('user is', user)
     if not user:
         if login_info.authentication_type == AuthenticationTypeEnum.password:
             raise UserNotExist 
@@ -68,6 +70,7 @@ async def login_user(
         pass
     if (success 
         and otp_code 
+        and otp_code.__len__() == 4
         #and (not login_info.is_testing)
         ):
         user.otp = otp_code

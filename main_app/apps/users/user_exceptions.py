@@ -1,5 +1,10 @@
 from fastapi import HTTPException, status
 
+class UsernameNotValid(HTTPException):
+	def __init__(self):
+		self.status_code = 400
+		self.detail = "not valid username"
+
 class IncorrectUsernameOrPassword(HTTPException):
 	def __init__(self):
 		self.status_code = 400
