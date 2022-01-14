@@ -143,9 +143,9 @@ class BaseOrder(BaseModel):
     date_created: Optional[datetime] = Field(default_factory=get_time_now)
     date_modified: Optional[datetime] = Field(default_factory=get_time_now)
     # payment method id 
-    payment_method: Optional[PaymentMethod] = None
+    payment_method: PaymentMethod
     # delivery_method id
-    delivery_method: Optional[DeliveryMethod] = None
+    delivery_method: DeliveryMethod
 
     # user_delivery_address object, if delivery method is 'delivery'
     delivery_address: Optional[UserDeliveryAddress] = None
