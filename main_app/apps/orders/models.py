@@ -19,8 +19,8 @@ from apps.cart.models import BaseCart, LineItem, LineItemUpdate
 from apps.users.models import UserDeliveryAddress
 from apps.users.user import get_user_by_id
 
-from apps.payments.models import PaymentMethod
-from apps.delivery.models import DeliveryMethod
+from apps.payments.models import PaymentMethod, PaymentMethodEnum
+from apps.delivery.models import DeliveryMethod, DeliveryMethodEnum
 from apps.site.models import PickupAddress
 from apps.site.utils import get_time_now
 
@@ -102,9 +102,9 @@ class BaseOrderCreate(BaseModel):
     # associated cart_id
     cart_id: Optional[UUID4] = None
     # payment method id 
-    payment_method: Optional[str] = None
+    payment_method: PaymentMethodEnum
     # delivery_method id
-    delivery_method: Optional[str] = None
+    delivery_method: DeliveryMethodEnum
     # user_delivery_address id, if delivery method is 'delivery'
     delivery_address: Optional[UUID4] = None
     # guest delivery address

@@ -1,6 +1,12 @@
 from typing import Optional, List
+from enum import Enum
 
 from pydantic import UUID4, BaseModel, Field
+
+class PaymentMethodEnum(str, Enum):
+    cash = "cash"
+    card_courier = "cart_courier"
+    card = "card"
 
 
 class PaymentMethod(BaseModel):

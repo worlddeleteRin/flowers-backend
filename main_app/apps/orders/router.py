@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from pymongo import ReturnDocument
 
 import uuid
+from apps.cart.cart_exceptions import CartNotSpecified
 
 # import config (env variables)
 from config import settings
@@ -175,7 +176,7 @@ async def create_order(
     order: BaseOrder = new_order_object(new_order)
     # add products line_items to order
     if not order.cart:
-        raise
+        raise CartNotSpecified
     for line_item in order.cart.line_items:
         if line_item.product == None:
             line_item.attach_product()

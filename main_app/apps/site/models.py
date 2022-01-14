@@ -5,6 +5,7 @@ from pydantic import UUID4, BaseModel, Field
 
 from database.main_db import db_provider
 
+# site models changes here
 
 class PickupAddress(BaseModel):
     id: UUID4 = Field(default_factory=uuid.uuid4, alias="_id")
