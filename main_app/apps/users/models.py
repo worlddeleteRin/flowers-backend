@@ -33,14 +33,14 @@ class UserDeliveryAddress(BaseModel):
     """
     id: UUID4 = Field(default_factory=uuid.uuid4, alias="_id")
     user_id: Optional[UUID4] = None
-    city: Optional[str] = ""
+    city: str = ""
     street: str
     house_number: str
-    flat_number: Optional[str] = ""
-    entrance_number: Optional[str] = ""
-    floor_number: Optional[str] = ""
-    address_display: Optional[str] = ""
-    comment: Optional[str] = ""
+    flat_number: str = ""
+    entrance_number: str = ""
+    floor_number: str = ""
+    address_display: str = ""
+    comment: str = ""
 
     class Config:
         allow_population_by_field_name = True

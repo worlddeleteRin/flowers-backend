@@ -130,7 +130,7 @@ class BaseOrder(BaseModel):
     # id of cart, that was converted to order
     cart_id: Optional[UUID4] = None
     # attached cart to order
-    cart: Optional[BaseCart] = None
+    cart: BaseCart
     # id of the customer, that makes order, or, that is assigned to the order by admin
     customer_id: Optional[UUID4] = None
     # customer username
@@ -156,7 +156,7 @@ class BaseOrder(BaseModel):
     # pickup_address id, if delivery_method is 'pickup'
     pickup_address: Optional[PickupAddress] = None
     # custom customer message, provided for order
-    custom_message: Optional[str] = None
+    custom_message: str = "" 
     
     def check_can_edit(self):
         can_not_edit_statusses = ['completed', 'cancelled']
