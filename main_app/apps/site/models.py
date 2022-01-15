@@ -7,6 +7,12 @@ from database.main_db import db_provider
 
 # site models changes here
 
+class ColorARGB(BaseModel):
+    a: int = 255
+    r: int = 255
+    g: int = 255
+    b: int = 255
+
 class PickupAddress(BaseModel):
     id: UUID4 = Field(default_factory=uuid.uuid4, alias="_id")
     name: str
