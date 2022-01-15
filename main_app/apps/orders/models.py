@@ -21,7 +21,7 @@ from apps.users.user import get_user_by_id
 
 from apps.payments.models import PaymentMethod, PaymentMethodEnum
 from apps.delivery.models import DeliveryMethod, DeliveryMethodEnum
-from apps.site.models import PickupAddress
+from apps.site.models import ColorARGB, PickupAddress
 from apps.site.utils import get_time_now
 
 from database.main_db import db_provider
@@ -31,19 +31,24 @@ class OrderStatus(BaseModel):
     id: str
     name: str
     name_display: str
-    color: str = "black"
+    color: ColorARGB = ColorARGB()
+
+class OrderStatusColors():
+    awaiting_confirmation = ColorARGB(
+        a=255,r=252,g=44,b=3
+    )
 
 awaiting_confirmation = OrderStatus(
     id = "awaiting_confirmation",
     name = "На подтверждении",
     name_display = "На подтверждении",
-    color = "orange",
+    color = OrderStatusColors.awaiting_confirmation,
 )
 awaiting_cooking = OrderStatus(
     id = "awaiting_cooking",
     name = "Заказ готовится",
     name_display = "Заказ готовится",
-    color="blue"
+    color = OrderStatusColors.awaiting_confirmation,
 )
 awaiting_payment = OrderStatus(
     id = "awaiting_payment",
@@ -64,13 +69,13 @@ completed = OrderStatus(
     id = "completed",
     name = "Завершен",
     name_display = "Завершен",
-    color = "green"
+    color = OrderStatusColors.awaiting_confirmation,
 )
 cancelled = OrderStatus(
     id = "cancelled",
     name = "Отменен",
     name_display = "Отменен",
-    color="red"
+    color = OrderStatusColors.awaiting_confirmation,
 )
 
 order_statuses = {
