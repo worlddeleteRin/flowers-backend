@@ -14,6 +14,9 @@ from apps.site.delivery_pickup import get_pickup_address_by_id
 from apps.users.user import get_user_delivery_address_by_id
 from apps.cart.cart import get_cart_by_id, get_cart_by_session_id
 from apps.cart.models import BaseCart
+from apps.cart.cart_exceptions import CartNotSpecified
+from apps.payments.models import PaymentMethod
+from apps.delivery.models import DeliveryMethod
 
 from database.main_db import db_provider
 
@@ -30,24 +33,39 @@ def get_order_by_id(order_id: uuid.UUID, link_products: bool = True) -> BaseOrde
 
 def new_order_object(new_order: BaseOrderCreate):
     exclude_fields = {"delivery_method", "payment_method", "delivery_address", "pickup_address"}
-    order = BaseOrder(**new_order.dict(exclude=exclude_fields))
-    order.payment_method = get_payment_method_by_id(new_order.payment_method)
-    order.delivery_method = get_delivery_method_by_id(new_order.delivery_method)
+    # order = BaseOrder(**new_order.dict(exclude=exclude_fields))
+    payment_method: PaymentMethod = get_payment_method_by_id(new_order.payment_method)
+    delivery_method: DeliveryMethod = get_delivery_method_by_id(new_order.delivery_method)
+    delivery_address = None
+    pickup_address = None
+    if new_order.delivery_address:
+        delivery_address = get_user_delivery_address_by_id(new_order.delivery_address)
+    if new_order.pickup_address:
+        pickup_address = get_pickup_address_by_id(new_order.pickup_address)
+    current_cart = None
     if new_order.cart_id:
         cart = get_cart_by_id(new_order.cart_id)
-        order.cart = cart
+        if cart:
+            current_cart = cart
     elif new_order.customer_session_id:
         cart = get_cart_by_session_id(new_order.customer_session_id)
         if cart:
-            order.cart = cart
+            current_cart = cart
     elif new_order.line_items:
         cart = BaseCart()
         cart.line_items = new_order.line_items
-        order.cart = cart
-    if new_order.delivery_address:
-        order.delivery_address = get_user_delivery_address_by_id(new_order.delivery_address)
-    if new_order.pickup_address:
-        order.pickup_address = get_pickup_address_by_id(new_order.pickup_address)
+        current_cart = cart
+    if not current_cart:
+        raise CartNotSpecified
+
+    order = BaseOrder(
+        **new_order.dict(exclude=exclude_fields),
+        cart = current_cart,
+        payment_method = payment_method,
+        delivery_method = delivery_method,
+        delivery_address = delivery_address,
+        pickup_address = pickup_address,
+    )
     return order
 
 def get_orders_by_user_id(user_id: UUID4):

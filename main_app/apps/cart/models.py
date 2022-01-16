@@ -103,6 +103,12 @@ class BaseCart(BaseModel):
     class Config:
         allow_population_by_field_name = True
 
+    @staticmethod
+    def delete_by_id(id: UUID4):
+        db_provider.carts_db.remove(
+            {"_id": id}
+        )
+
     def delete_coupons(self):
         for line_item in self.line_items:
             line_item.promo_price = None

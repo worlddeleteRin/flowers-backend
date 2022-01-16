@@ -16,7 +16,7 @@ class ColorARGB(BaseModel):
 class PickupAddress(BaseModel):
     id: UUID4 = Field(default_factory=uuid.uuid4, alias="_id")
     name: str
-    info: Optional[str]
+    info: str = ""
 
     def save_db(self):
         db_provider.pickup_addresses_db.insert_one(

@@ -8,6 +8,7 @@ from pymongo import ReturnDocument
 
 import uuid
 from apps.cart.cart_exceptions import CartNotSpecified
+from apps.cart.models import BaseCart
 
 # import config (env variables)
 from config import settings
@@ -175,8 +176,6 @@ async def create_order(
     ):
     order: BaseOrder = new_order_object(new_order)
     # add products line_items to order
-    if not order.cart:
-        raise CartNotSpecified
     for line_item in order.cart.line_items:
         if line_item.product == None:
             line_item.attach_product()
@@ -195,6 +194,8 @@ async def create_order(
     # delete cart by session_id, if it is exist
     if new_order.customer_session_id:
         delete_session_cart(new_order.customer_session_id)
+    elif new_order.cart_id:
+        BaseCart.delete_by_id(new_order.cart_id)
     # delet cart by session_id, if it is exist
     # delete cart by cart_id, if it is specified in request
 #   if order.cart_id:
@@ -205,5 +206,5 @@ async def create_order(
     # order_created_event(background_tasks, order)
     # background_tasks.add_task(send_order_admin_notification, order)
 
-    order.dict()
+    return order.dict()
 

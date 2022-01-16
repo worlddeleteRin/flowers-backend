@@ -119,7 +119,7 @@ class BaseOrderCreate(BaseModel):
     # pickup_address id, if delivery_method is 'pickup'
     pickup_address: Optional[UUID4] = None
     # custom customer message, provided for order
-    custom_message: Optional[str] = None
+    custom_message: str = ""
 
 class BaseOrderUpdate(BaseModel):
     status_id: OrderStatusEnum

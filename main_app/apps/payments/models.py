@@ -5,7 +5,7 @@ from pydantic import UUID4, BaseModel, Field
 
 class PaymentMethodEnum(str, Enum):
     cash = "cash"
-    card_courier = "cart_courier"
+    card_courier = "card_courier"
     card = "card"
 
 

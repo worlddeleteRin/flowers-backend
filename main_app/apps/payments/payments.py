@@ -7,10 +7,10 @@ from config import settings
 from database.main_db import db_provider
 
 
-def get_payment_methods():
+def get_payment_methods() -> list:
 	payment_methods_dict = db_provider.payment_methods_db.find({})
 	if not payment_methods_dict:
-		return None
+		return []
 	payment_methods = [PaymentMethod(**p_method).dict() for p_method in payment_methods_dict]
 	return payment_methods
 

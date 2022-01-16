@@ -12,16 +12,16 @@ from apps.users.authentication_provider import AuthenticationProvider
 # import config (env variables)
 from config import settings
 
-from .models import AuthenticationTypeEnum, BaseUser, BaseUserDB, BaseUserCreate, BaseUserLoginInfo, BaseUserVerify, BaseUserUpdate, BaseUserUpdatePassword, Token, TokenData, BaseUserExistVerified, BaseUserRestore, BaseUserRestoreVerify, UserDeliveryAddress, UserDeleteDeliveryAddress
+from .models import *
 # models 
-from .user import authenticate_user_call_otp, format_validate_username, get_current_active_user, get_current_user, get_user, authenticate_user_password, get_user_by_username, get_user_register, get_user_verify, get_user_restore, get_user_restore_verify, get_current_admin_user, search_users_by_username, get_user_delivery_addresses
+from .user import *
 
 from .password import get_password_hash
 
 from .jwt import create_access_token
 
 # user exceptions
-from .user_exceptions import IncorrectUsernameOrPassword, NotSendVerificationCode, UserNotExist, IncorrectUserCredentials
+from .user_exceptions import *
 
 # user password hash and decode methods
 from .password import get_password_hash
@@ -298,12 +298,13 @@ async def user_delivery_addresses(
 
 @router.post("/me/delivery-address")
 async def create_user_delivery_address(
-    new_address: UserDeliveryAddress,
+    address: CreateUserDeliveryAddress,
     current_user: BaseUserDB = Depends(get_current_active_user)
     ):
-    print('current user is', current_user)
-    new_address.user_id = current_user.id
-    print('new address is', new_address)
+    new_address = UserDeliveryAddress(
+        **address.dict(),
+        user_id = current_user.id
+    )
     db_provider.users_addresses_db.insert_one(
         new_address.dict(by_alias=True)
     )
@@ -358,9 +359,10 @@ async def admin_get_user_delivery_addresses(
 @router.post("/{user_id}/delivery-address")
 async def admin_create_user_delivery_address(
     user_id: UUID4,
-    new_address: UserDeliveryAddress,
+    new_address: CreateUserDeliveryAddress,
     admin_user = Depends(get_current_admin_user)
     ):
+    # TODO: need to implement
     current_user = get_user_by_id(user_id)
     if not current_user:
         return None

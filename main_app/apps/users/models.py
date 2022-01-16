@@ -27,13 +27,11 @@ class AuthenticationTypeEnum(str, Enum):
 class UserDeleteDeliveryAddress(BaseModel):
     id: UUID4
 
-class UserDeliveryAddress(BaseModel):
+class CreateUserDeliveryAddress(BaseModel):
     """
-        Base User delivery model
+        CreateUserDeliveryAddress model
     """
-    id: UUID4 = Field(default_factory=uuid.uuid4, alias="_id")
-    user_id: Optional[UUID4] = None
-    city: str = ""
+    city: str
     street: str
     house_number: str
     flat_number: str = ""
@@ -41,6 +39,13 @@ class UserDeliveryAddress(BaseModel):
     floor_number: str = ""
     address_display: str = ""
     comment: str = ""
+
+class UserDeliveryAddress(CreateUserDeliveryAddress):
+    """  
+        UserDeliveryAddress model
+    """
+    id: UUID4 = Field(default_factory=uuid.uuid4, alias="_id")
+    user_id: UUID4
 
     class Config:
         allow_population_by_field_name = True
