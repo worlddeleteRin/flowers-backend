@@ -47,6 +47,22 @@ class UserDeliveryAddress(CreateUserDeliveryAddress):
     id: UUID4 = Field(default_factory=uuid.uuid4, alias="_id")
     user_id: UUID4
 
+    @staticmethod
+    def find_by_id(id: UUID4):
+        addressRaw = db_provider.users_addresses_db.find_one(
+            {"_id": id}
+        )
+        if not addressRaw:
+            return None
+        return UserDeliveryAddress(**addressRaw)
+
+    def update_db(self):
+        db_provider.users_addresses_db.find_one_and_update(
+            filter={"_id": self.id},
+            update={"$set": self.dict(by_alias=True)},
+            return_document=ReturnDocument.AFTER
+        )
+
     class Config:
         allow_population_by_field_name = True
 
@@ -54,7 +70,7 @@ class UserDeliveryAddress(CreateUserDeliveryAddress):
     def default_address_display(cls, v, values):
         if v:
             return v
-        address = f"г. Симферополь, ул. {values['street']}, д. {values['house_number']}"
+        address = f"ул. {values['street']}, д. {values['house_number']}"
         if values['flat_number'].__len__() > 0:
             address += f", кв. {values['flat_number']}"
         if values['entrance_number'].__len__() > 0:

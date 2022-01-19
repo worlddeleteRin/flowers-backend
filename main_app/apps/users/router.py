@@ -311,6 +311,19 @@ async def create_user_delivery_address(
     print('added new address')
     return get_user_delivery_addresses(current_user.id)
 
+@router.patch("/me/delivery-address/{address_id}")
+async def update_user_delivery_address(
+    new_address: CreateUserDeliveryAddress,
+    address_id: UUID4,
+    current_user: BaseUserDB = Depends(get_current_active_user)
+):
+    address: UserDeliveryAddress | None = UserDeliveryAddress.find_by_id(address_id)
+    if not address:
+        raise UserDeliveryAddressNotExist
+    address_update = address.copy(update=new_address.dict())
+    address_update.update_db()
+    return address_update.dict()
+
 @router.delete("/me/delivery-address")
 async def delete_user_delivery_address(
     delete_address: UserDeleteDeliveryAddress,
