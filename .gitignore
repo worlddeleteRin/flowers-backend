@@ -10,6 +10,8 @@ secure.py
 .env.prod
 .env.dev
 **/.env
+/env
+env
 test
 .test
 pyrightconfig.json
