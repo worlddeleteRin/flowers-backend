@@ -33,7 +33,7 @@ class CreateUserDeliveryAddress(BaseModel):
     """
     city: str
     street: str
-    house_number: str
+    house_number: str = ""
     flat_number: str = ""
     entrance_number: str = ""
     floor_number: str = ""

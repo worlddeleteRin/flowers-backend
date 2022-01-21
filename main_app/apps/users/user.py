@@ -78,6 +78,8 @@ otp: str) -> bool:
         ):
         return False
     user.otp = ""
+    user.is_verified = True
+    user.is_active = True
     user.update_db()
     return True
 
