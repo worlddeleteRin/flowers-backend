@@ -28,7 +28,7 @@ from .password import get_password_hash
 
 from apps.orders.orders import get_orders_by_user_id
 
-from .user import get_current_admin_user, get_user_by_id, create_user
+from .user import get_current_admin_user, get_user_by_id, create_user, check_user_delivery_address
 
 from database.main_db import db_provider
 
@@ -305,6 +305,11 @@ async def create_user_delivery_address(
         **address.dict(),
         user_id = current_user.id
     )
+    is_valid = check_user_delivery_address(
+        address = new_address
+    )
+    if not is_valid:
+        raise InvalidDeliveryAddress
     db_provider.users_addresses_db.insert_one(
         new_address.dict(by_alias=True)
     )

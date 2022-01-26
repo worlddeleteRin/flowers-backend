@@ -24,6 +24,14 @@ class AuthenticationTypeEnum(str, Enum):
     password = "password"
     
 
+class RecipientTypeEnum(str, Enum):
+    user = "user"
+    other_person = "other_person"
+
+class RecipientPerson(BaseModel):
+    name: str = ""
+    phone: str = ""
+
 class UserDeleteDeliveryAddress(BaseModel):
     id: UUID4
 
@@ -39,6 +47,8 @@ class CreateUserDeliveryAddress(BaseModel):
     floor_number: str = ""
     address_display: str = ""
     comment: str = ""
+    recipient_type: RecipientTypeEnum = RecipientTypeEnum.user
+    recipient_person: Optional[RecipientPerson]
 
 class UserDeliveryAddress(CreateUserDeliveryAddress):
     """  

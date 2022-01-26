@@ -51,6 +51,11 @@ class UserDeliveryAddressNotExist(HTTPException):
 		self.status_code = 400
 		self.detail = "UserDeliveryAddress not exist"
 
+class InvalidDeliveryAddress(HTTPException):
+	def __init__(self):
+		self.status_code = 400
+		self.detail = "invalid delivery address"
+
 class UserNotAdmin(HTTPException):
 	def __init__(self):
 		self.status_code = 400

@@ -16,7 +16,7 @@ from .order_exceptions import OrderNotExist
 # import line items from cart app
 from apps.cart.models import BaseCart, LineItem, LineItemUpdate
 # import UserDeliveryAddress from users app
-from apps.users.models import UserDeliveryAddress
+from apps.users.models import UserDeliveryAddress, RecipientTypeEnum, RecipientPerson
 from apps.users.user import get_user_by_id
 
 from apps.payments.models import PaymentMethod, PaymentMethodEnum
@@ -120,6 +120,8 @@ class BaseOrderCreate(BaseModel):
     pickup_address: Optional[UUID4] = None
     # custom customer message, provided for order
     custom_message: str = ""
+    recipient_type: RecipientTypeEnum = RecipientTypeEnum.user
+    recipient_person: Optional[RecipientPerson] = None
 
 class BaseOrderUpdate(BaseModel):
     status_id: OrderStatusEnum
@@ -162,6 +164,8 @@ class BaseOrder(BaseModel):
     pickup_address: Optional[PickupAddress] = None
     # custom customer message, provided for order
     custom_message: str = "" 
+    recipient_type: RecipientTypeEnum = RecipientTypeEnum.user
+    recipient_person: Optional[RecipientPerson] = None
     
     def check_can_edit(self):
         can_not_edit_statusses = ['completed', 'cancelled']

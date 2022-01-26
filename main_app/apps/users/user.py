@@ -3,8 +3,7 @@ from pydantic import UUID4
 from jose import JWTError, jwt
 from starlette.exceptions import HTTPException
 
-
-from .models import BaseUser, BaseUserDB, Token, TokenData, BaseUserCreate, BaseUserVerify, BaseUserRestore, BaseUserRestoreVerify, UserDeliveryAddress, UserDeliveryAddress
+from .models import *
 from config import settings
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
@@ -246,4 +245,12 @@ def search_users_by_username(search_string: str):
     ).limit(10)
     users = [BaseUser(**user).dict() for user in users_dict]
     return users
+
+def check_user_delivery_address(
+    address: UserDeliveryAddress
+):
+    if address.recipient_type == RecipientTypeEnum.other_person:
+        if not address.recipient_person:
+            return False
+    return True
 
