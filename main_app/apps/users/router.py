@@ -285,7 +285,7 @@ async def update_user(
         "$set": update_data,
     }, return_document=ReturnDocument.AFTER)
     # check if updated info 'updatedExisting' = true ? 
-    return updated_user
+    return BaseUser(**updated_user).dict()
 
 @router.get("/me/delivery-address")
 async def user_delivery_addresses(
