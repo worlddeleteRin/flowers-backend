@@ -5,7 +5,30 @@ from pydantic import UUID4, BaseModel, Field
 
 from database.main_db import db_provider
 
+from config import settings
+
 # site models changes here
+
+class CommonInfo(BaseModel):
+    location_address: str = ""
+    delivery_phone: str = ""
+    delivery_phone_display: str = ""
+    main_logo_link: str = ""
+    map_delivery_locaiton_link: str = ""
+
+    @staticmethod
+    def get_default():
+        info = CommonInfo(
+            location_address = "Здесь будет адрес доставки",
+            delivery_phone = "+79781111111",
+            delivery_phone_display = "7 978 111 11 11",
+            main_logo_link = settings.base_static_url + "logo_variant.png",
+            map_delivery_location_link = "https://yandex.ru/map-widget/v1/?um=constructor%3A9b116676061cfe4fdf22efc726567c5f21c243f18367e2b8a207accdae7e4786&amp;source=constructor"
+        )
+        return info
+
+    class Config:
+        allow_population_by_field_name = True
 
 class ColorARGB(BaseModel):
     a: int = 255
