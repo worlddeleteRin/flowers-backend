@@ -120,8 +120,11 @@ class BaseOrderCreate(BaseModel):
     pickup_address: Optional[UUID4] = None
     # custom customer message, provided for order
     custom_message: str = ""
+    postcard_text: str = ""
     recipient_type: RecipientTypeEnum = RecipientTypeEnum.user
     recipient_person: Optional[RecipientPerson] = None
+    # delivery datetime
+    delivery_datetime: Optional[datetime] = Field(default_factory=None, default=None)
 
 class BaseOrderUpdate(BaseModel):
     status_id: OrderStatusEnum
@@ -147,8 +150,11 @@ class BaseOrder(BaseModel):
     status: OrderStatus = order_statuses["awaiting_confirmation"]
     #   status: OrderStatusEnum = OrderStatusEnum.awaiting_confirmation
 
-    date_created: Optional[datetime] = Field(default_factory=get_time_now)
-    date_modified: Optional[datetime] = Field(default_factory=get_time_now)
+    # dates data
+    date_created: datetime = Field(default_factory=get_time_now)
+    date_modified: datetime = Field(default_factory=get_time_now)
+    # delivery_datetime: Optional[datetime] = None
+    delivery_datetime: Optional[datetime] = Field(default_factory=None, default=None)
     # payment method id 
     payment_method: PaymentMethod
     # delivery_method id
@@ -164,6 +170,8 @@ class BaseOrder(BaseModel):
     pickup_address: Optional[PickupAddress] = None
     # custom customer message, provided for order
     custom_message: str = "" 
+    # postcard text
+    postcard_text: str = ""
     recipient_type: RecipientTypeEnum = RecipientTypeEnum.user
     recipient_person: Optional[RecipientPerson] = None
     

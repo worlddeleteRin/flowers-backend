@@ -53,14 +53,14 @@ class CommonInfo(BaseModel):
     delivery_phone: str = ""
     delivery_phone_display: str = ""
     main_logo_link: str = ""
-    map_delivery_locaition_link: str = ""
+    map_delivery_location_link: str = ""
     socials: List[SocialContact] = []
 
     @staticmethod
     def get_default():
         info = CommonInfo(
             location_address = "Здесь будет адрес доставки",
-            delivery_phone = "+79781111111",
+            delivery_phone = "tel://+79781111111",
             delivery_phone_display = "7 978 111 11 11",
             main_logo_link = settings.base_static_url + "logo_variant.png",
             map_delivery_location_link = "https://yandex.ru/map-widget/v1/?um=constructor%3A9b116676061cfe4fdf22efc726567c5f21c243f18367e2b8a207accdae7e4786&amp;source=constructor",

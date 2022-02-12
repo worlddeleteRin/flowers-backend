@@ -121,12 +121,14 @@ def create_admin_order(
 # get current order
 @router.get("/{order_id}")
 def get_order(
-    order_id: uuid.UUID
-    ):
+    order_id: uuid.UUID,
+    current_user: BaseUser = Depends(get_current_active_user)
+):
     order = get_order_by_id(order_id)
-    return {
-        'order': order.dict()
-    }
+    if not order.customer_id == current_user.id:
+        return None
+    return order.dict()
+
 
 # delete current order
 # only for admin
